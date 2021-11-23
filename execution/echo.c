@@ -1,4 +1,4 @@
-#include	"execution.h"
+#include "execution.h"
 
 void	ft_check_newline(t_cmds *cmd, int *t, int *n)
 {
@@ -25,6 +25,18 @@ void	ft_check_newline(t_cmds *cmd, int *t, int *n)
 	}
 }
 
+void	n_zero(t_cmds *cmd, int t)
+{
+	while (cmd->args[t])
+	{
+		write(1, cmd->args[t], ft_strlen(cmd->args[t]));
+		if (cmd->args[t + 1])
+			write(1, " ", 1);
+		t++;
+	}
+	write(1, "\n", 1);
+}
+
 void	echo(t_cmds *cmd)
 {
 	int	n;
@@ -36,16 +48,7 @@ void	echo(t_cmds *cmd)
 	{
 		ft_check_newline(cmd, &t, &n);
 		if (n == 0)
-		{
-			while (cmd->args[t])
-			{
-				write(1, cmd->args[t], ft_strlen(cmd->args[t]));
-				if (cmd->args[t + 1])
-					write(1, " ", 1);
-				t++;
-			}
-			write(1, "\n", 1);
-		}
+			n_zero(cmd, t);
 		else if (n == 1)
 		{
 			while (cmd->args[t])

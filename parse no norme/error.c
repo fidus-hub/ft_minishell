@@ -1,6 +1,5 @@
 #include "../minishell.h"
 
-
 int	nb_of_quotes(char *line)
 {
 	int	i;
@@ -79,7 +78,7 @@ int	check_error_pipes(char *line)
 		if (line[i] == '"')
 			d_q++;
 		if ((line[i] == '|' && !line[i + 1])
-			|| (check_space(line, i) && d_q % 2 == 0))
+			|| (check_space(line, i) == 1 && d_q % 2 == 0))
 		{
 			printf("syntax error near unexpected token `|'\n");
 			return (1);
@@ -100,26 +99,6 @@ int	check_error_pipes(char *line)
 				printf("syntax error near unexpected token `|'\n");
 				return (1);
 			}
-		}
-		i++;
-	}
-	return (0);
-}
-
-int	rederror(char *str)
-{
-	int i;
-
-	i = 0;
-	while (str[i])
-	{
-		if (str[i] == '>' || str[i] == '<')
-		{
-			i+=2;
-			while (str[i] == ' ')
-				i++;
-			if (!str[i] || str[i] == '>' || str[i] == '<')
-				return (1);
 		}
 		i++;
 	}
@@ -153,8 +132,7 @@ int	check_error_redirections(char *line)
 			return (1);
 		}
 		else if ((line[i] == '>' && line[i + 1] == '>' && line[i + 2] == '>')
-			|| (line[i] == '>' && line[i + 1] == '>' && !line[i + 2])
-			|| rederror(line))
+			|| (line[i] == '>' && line[i + 1] == '>' && !line[i + 2]))
 		{
 			printf("minishell: syntax error near unexpected token `>'\n");
 			return (1);

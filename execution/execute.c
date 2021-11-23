@@ -1,10 +1,18 @@
 #include "execution.h"
 
+void	ft_perror(char *c, char *s)
+{
+	write(2, "minishell: ", 12);
+	write(2, c, ft_strlen(c));
+	write(2, s, ft_strlen(s));
+}
+
 void	fill_env(t_exec *exec, t_headers *header)
 {
 	int		i;
 	t_env	*env;
 
+	i = 0;
 	env = header->env_h;
 	while (env)
 	{
@@ -28,19 +36,16 @@ void	fill_env(t_exec *exec, t_headers *header)
 	exec->env[i] = 0;
 }
 
-void	exec_init(t_headers *header, t_exec *exec)
+void	half_exec_init(t_exec *exec, t_cmds **cmd)
 {
-	t_env	*env;
-	t_cmds	*cmd;
-	int		i;
+	int	i;
 
 	i = 0;
-	cmd = header->cmd_h;
-	while (cmd)
+	while (*cmd)
 	{
 		i++;
-		cmd->path = NULL;
-		cmd = cmd->next;
+		(*cmd)->path = NULL;
+		*cmd = (*cmd)->next;
 	}
 	exec->path = NULL;
 	exec->pid = malloc(sizeof(int) * (i));
@@ -49,6 +54,17 @@ void	exec_init(t_headers *header, t_exec *exec)
 	exec->i = 0;
 	exec->in = 0;
 	exec->fd = malloc(sizeof(int) * 2);
+}
+
+void	exec_init(t_headers *header, t_exec *exec)
+{
+	t_env		*env;
+	t_cmds		*cmd;
+	int			i;
+
+	i = 0;
+	cmd = header->cmd_h;
+	half_exec_init(exec, &cmd);
 	env = header->env_h;
 	while (env)
 	{
@@ -67,119 +83,153 @@ void	exec_init(t_headers *header, t_exec *exec)
 	fill_env(exec, header);
 }
 
-void	exec_free(t_exec *exec)
+void 	exec_free(t_exec *exec)
 {
 	if (exec->path)
 		ft_free(exec->path);
 	free(exec->pid);
 	ft_free(exec->env);
-	free(exec->fd);
-	free(exec);
+	free (exec->fd);
+	free (exec);
+}
+
+void	join_path(t_exec *exec, t_cmds **cmd)
+{
+	char	*str;
+	int		fd;
+	int		i;
+
+	i = 0;
+	while (exec->path && exec->path[i])
+	{
+		str = ft_strjoin(exec->path[i], (*cmd)->args[0]);
+		fd = open(str, O_RDONLY);
+		if (fd != -1)
+		{
+			close(fd);
+			(*cmd)->path = ft_strjoin(exec->path[i], (*cmd)->args[0]);
+			free(str);
+			break ;
+		}
+		free(str);
+		i++;
+	}	
 }
 
 void	replace_arg(t_headers *header, t_exec *exec)
 {
 	t_cmds	*cmd;
-	char	*str;
-	int		i;
-	int		fd;
 
 	cmd = header->cmd_h;
 	while (cmd)
 	{
-		i = 0;
-		while (exec->path && exec->path[i])
-		{
-			str = ft_strjoin(exec->path[i], cmd->args[0]);
-			fd = open(str, O_RDONLY);
-			if (fd != -1)
-			{
-				close(fd);
-				cmd->path = ft_strjoin(exec->path[i], cmd->args[0]);
-				free(str);
-				break ;
-			}
-			free(str);
-			i++;
-		}
-		if (cmd->args[0] && strchr(cmd->args[0], '/'))
-		{
+		join_path(exec, &cmd);
+		if (cmd->args[0] && ft_strchr(cmd->args[0], '/'))
 			cmd->path = ft_strdup(cmd->args[0]);
-		}
 		cmd = cmd->next;
+	}
+}
+
+void	ft_more_cmd(t_cmds *cmd, t_exec *exec)
+{
+	struct stat	buff;
+
+	signal(SIGQUIT, SIG_DFL);
+	if (cmd->path == NULL)
+	{
+		write(2, "minishell: ", ft_strlen("minishell: "));
+		write(2, cmd->args[0], ft_strlen(cmd->args[0]));
+		write(2, ": command not found\n", ft_strlen(": command not found\n"));
+	}
+	else
+	{
+		if (cmd->args[0] && ft_strchr(cmd->args[0], '/'))
+		{
+			stat(cmd->args[0], &buff);
+			if (buff.st_mode & S_IFDIR)
+			{
+				ft_perror(cmd->args[0], "is a directory\n");
+				exit(126);
+			}
+		}
+		execve(cmd->path, cmd->args, exec->env);
+	}
+	if (cmd->args[0] && ft_strchr(cmd->args[0], '/'))
+		ft_perror(cmd->args[0], ": No such file or directory\n");
+	exit(127);
+}
+
+void	print_error(t_cmds *cmd, char *s, int i)
+{
+	write(2, "minishell: ", 12);
+	write(2, cmd->args[0], ft_strlen(cmd->args[0]));
+	write(2, s, ft_strlen(s));
+	if (i)
+		exit (i);
+}
+
+void	child_proccess(t_cmds *cmd, t_exec *exec)
+{
+	struct stat	buff;
+
+	signal(SIGQUIT, SIG_DFL);
+	ft_pipe_last(cmd, exec);
+	if (cmd->file_h && cmd->file_h->filename != NULL)
+		redirection(cmd, exec);
+	if (__get_var(GETEXIT, 0) == -1)
+	{
+		__get_var(SETEXIT, 1);
+		exit(1);
+	}
+	if (cmd->path == NULL)
+		print_error(cmd, ": command not found\n", 0);
+	else
+	{
+		if (cmd->args[0] && ft_strchr(cmd->args[0], '/'))
+		{
+			stat(cmd->args[0], &buff);
+			if (buff.st_mode & S_IFDIR)
+				print_error(cmd, ": is a directory\n", 126);
+		}
+		execve(cmd->path, cmd->args, exec->env);
+	}
+}
+
+void	one_command(t_cmds *cmd, t_exec *exec)
+{
+	int	pid;
+	int	exitstatu;
+
+	pid = fork();
+	if (pid == 0)
+	{
+		child_proccess(cmd, exec);
+		if (cmd->args[0] && strchr(cmd->args[0], '/'))
+			ft_perror(cmd->args[0], ": No such file or directory\n");
+		exit(127);
+	}
+	waitpid(pid, &exitstatu, 0);
+	if (WIFEXITED(exitstatu))
+		__get_var(SETEXIT, WEXITSTATUS(exitstatu));
+	else if (WIFSIGNALED(exitstatu))
+	{
+		__get_var(SETEXIT, WTERMSIG(exitstatu) + 128);
+		if (WTERMSIG(exitstatu) == SIGQUIT)
+			write(2, "\\QUIT\n", 7);
 	}
 }
 
 void	ft_execve(t_cmds *cmd, t_exec *exec)
 {
-	int			exitstatu;
-	int			pid;
-	struct stat	buff;
-
 	if (!cmd->next && !cmd->prec)
 	{
-		pid = fork();
-		if (pid == 0)
-		{
-			signal(SIGQUIT, SIG_DFL);
-			ft_pipe_last(cmd, exec);
-			if (cmd->file_h && cmd->file_h->filename != NULL)
-				redirection(cmd, exec);
-			if (cmd->path == NULL)
-				printf("minishell: %s: command not found\n", cmd->args[0]);
-			else
-			{
-				if (cmd->args[0] && strchr(cmd->args[0], '/'))
-				{
-					stat(cmd->args[0], &buff);
-					if (buff.st_mode & S_IFDIR)
-					{
-						printf("minishell: %s: is a directory\n", cmd->args[0]);
-						exit(126);
-					}
-				}
-				execve(cmd->path, cmd->args, exec->env);
-			}
-			if (cmd->args[0] && strchr(cmd->args[0], '/'))
-				printf("minishell: %s: No such file or directory\n",
-					cmd->args[0]);
-			exit(127);
-		}
-		waitpid(pid, &exitstatu, 0);
-		if (WIFEXITED(exitstatu))
-			__get_var(SETEXIT, WEXITSTATUS(exitstatu));
-		else if (WIFSIGNALED(exitstatu))
-		{
-			__get_var(SETEXIT, WTERMSIG(exitstatu) + 128);
-			if (WTERMSIG(exitstatu) == SIGQUIT)
-				dprintf(2, "\\QUIT\n");
-		}
+		one_command(cmd, exec);
 	}
 	else
-	{
-		signal(SIGQUIT, SIG_DFL);
-		if (cmd->path == NULL)
-			printf("minishell: %s: command not found\n", cmd->args[0]);
-		else
-		{
-			if (cmd->args[0] && strchr(cmd->args[0], '/'))
-			{
-				stat(cmd->args[0], &buff);
-				if (buff.st_mode & S_IFDIR)
-				{
-					printf("minishell: %s: is a directory\n", cmd->args[0]);
-					exit(126);
-				}
-			}
-			execve(cmd->path, cmd->args, exec->env);
-		}
-		if (cmd->args[0] && strchr(cmd->args[0], '/'))
-			printf("minishell: %s: No such file or directory\n", cmd->args[0]);
-		exit(127);
-	}
+		ft_more_cmd(cmd, exec);
 }
 
-void	check_builtins_execve(t_cmds *cmd, t_exec *exec, t_headers  *header)
+void	check_builtins_execve(t_cmds *cmd, t_exec *exec, t_headers *header)
 {
 	if (cmd->args[0])
 	{
@@ -194,15 +244,41 @@ void	check_builtins_execve(t_cmds *cmd, t_exec *exec, t_headers  *header)
 		else if (ft_strcmp(cmd->args[0], "pwd") == 0)
 			pwd(cmd);
 		else if (ft_strcmp(cmd->args[0], "cd") == 0)
-			cd(cmd);
+			cd(cmd, header);
 		else if (ft_strcmp(cmd->args[0], "exit") == 0)
-			ft_exit(header);
+			ft_exit(cmd);
 		else
 			ft_execve(cmd, exec);
 	}
 }
 
-void	check_builtins(t_cmds *cmd, t_exec *exec, t_headers  *header)
+void	dup_n_close(int out, int in)
+{
+	dup2(in, 0);
+	dup2(out, 1);
+	close(in);
+	close(out);
+}
+
+void	check_builtins_condition(t_cmds *cmd, t_exec *exec, t_headers *header)
+{
+	if (ft_strcmp(cmd->args[0], "env") == 0)
+		ft_env(exec);
+	else if (ft_strcmp(cmd->args[0], "echo") == 0)
+		echo(cmd);
+	else if (ft_strcmp(cmd->args[0], "export") == 0)
+		export(cmd, exec, header);
+	else if (ft_strcmp(cmd->args[0], "unset") == 0)
+		unset(cmd, exec, header);
+	else if (ft_strcmp(cmd->args[0], "pwd") == 0)
+		pwd(cmd);
+	else if (ft_strcmp(cmd->args[0], "cd") == 0)
+		cd(cmd, header);
+	else if (ft_strcmp(cmd->args[0], "exit") == 0)
+		ft_exit(cmd);
+}
+
+void	check_builtins(t_cmds *cmd, t_exec *exec, t_headers *header)
 {
 	int	in;
 	int	out;
@@ -211,27 +287,17 @@ void	check_builtins(t_cmds *cmd, t_exec *exec, t_headers  *header)
 	in = dup(0);
 	if (cmd->file_h && cmd->file_h->filename != NULL)
 		redirection(cmd, exec);
-	if (cmd->args[0])
+	if (__get_var(GETEXIT, 0) == -1)
 	{
-		if (ft_strcmp(cmd->args[0], "env") == 0)
-			ft_env(exec);
-		else if (ft_strcmp(cmd->args[0], "echo") == 0)
-			echo(cmd);
-		else if (ft_strcmp(cmd->args[0], "export") == 0)
-			export(cmd, exec, header);
-		else if (ft_strcmp(cmd->args[0], "unset") == 0)
-			unset(cmd, exec, header);
-		else if (ft_strcmp(cmd->args[0], "pwd") == 0)
-			pwd(cmd);
-		else if (ft_strcmp(cmd->args[0], "cd") == 0)
-			cd(cmd);
-		else if (ft_strcmp(cmd->args[0], "exit") == 0)
-			ft_exit(header);
+		__get_var(SETEXIT, 1);
+		dup_n_close(out, in);
 	}
-	dup2(in, 0);
-	dup2(out, 1);
-	close(in);
-	close(out);
+	else
+	{
+		if (cmd->args[0])
+			check_builtins_condition(cmd, exec, header);
+		dup_n_close(out, in);
+	}
 }
 
 int	is_builtin(t_cmds *cmd, t_exec *exec, t_headers *header)
@@ -257,18 +323,47 @@ int	is_builtin(t_cmds *cmd, t_exec *exec, t_headers *header)
 	return (0);
 }
 
-void	ft_cmds(t_exec *exec, t_cmds *cmd, t_headers *header)
+void	ft_cmds(t_exec *exec, t_cmds **cmd, t_headers *header)
 {
 	exec->pid[exec->i] = fork();
 	if (exec->pid[exec->i] == 0)
 	{
 		signal(SIGQUIT, SIG_DFL);
-		ft_pipe(cmd, exec);
+		ft_pipe((*cmd), exec);
+		if ((*cmd)->file_h && (*cmd)->file_h->filename != NULL)
+			redirection((*cmd), exec);
+		if (__get_var(GETEXIT, 0) == -1)
+		{
+			__get_var(SETEXIT, 1);
+			exit(1);
+		}
+		check_builtins_execve((*cmd), exec, header);
+		exit(__get_var(GETEXIT, 0));
+	}
+}
+
+void	ft_simple_cmd(t_exec *exec, t_cmds *cmd, t_headers *header)
+{
+	pipe(exec->fd);
+	exec->pid[exec->i] = fork();
+	if (exec->pid[exec->i] == 0)
+	{
+		signal(SIGQUIT, SIG_DFL);
+		ft_pipe_last(cmd, exec);
 		if (cmd->file_h && cmd->file_h->filename != NULL)
 			redirection(cmd, exec);
+		if (__get_var(GETEXIT, 0) == -1)
+		{
+			__get_var(SETEXIT, 1);
+			close(exec->fd[1]);
+			close(exec->fd[0]);
+			exit(1);
+		}
 		check_builtins_execve(cmd, exec, header);
 		exit(__get_var(GETEXIT, 0));
 	}
+	close(exec->fd[1]);
+	close(exec->fd[0]);
 }
 
 void	ft_last_cmd(t_exec *exec, t_cmds *cmd, t_headers *header)
@@ -276,32 +371,48 @@ void	ft_last_cmd(t_exec *exec, t_cmds *cmd, t_headers *header)
 	if (cmd && cmd->next == NULL)
 	{
 		if (cmd->prec != NULL)
-		{
-			pipe(exec->fd);
-			exec->pid[exec->i] = fork();
-			if (exec->pid[exec->i] == 0)
-			{
-				signal(SIGQUIT, SIG_DFL);
-				ft_pipe_last(cmd, exec);
-				if (cmd->file_h && cmd->file_h->filename != NULL)
-					redirection(cmd, exec);
-				check_builtins_execve(cmd, exec, header);
-				exit(__get_var(GETEXIT, 0));
-			}
-			close(exec->fd[1]);
-			close(exec->fd[0]);
-		}
+			ft_simple_cmd(exec, cmd, header);
 		else
 		{
 			if (is_builtin(cmd, exec, header) || !cmd->args[0])
-			{
 				check_builtins(cmd, exec, header);
-			}
 			else
 				check_builtins_execve(cmd, exec, header);
 		}
 		if (exec->in != 0)
 			close(exec->in);
+	}
+}
+
+t_cmds	*commands(t_exec *exec, t_cmds *cmd, t_headers *header)
+{
+	while (cmd && cmd->next != NULL)
+	{
+		pipe(exec->fd);
+		ft_cmds(exec, &cmd, header);
+		if (exec->fd[1] > 2)
+			close(exec->fd[1]);
+		if (exec->in != 0)
+			close(exec->in);
+		exec->in = exec->fd[0];
+		exec->i++;
+		cmd = cmd->next;
+	}
+	return (cmd);
+}
+
+void	some_status_code(t_cmds *cmd, int *stat)
+{
+	if (cmd->prec)
+	{
+		if (WIFEXITED(*stat))
+			__get_var(SETEXIT, WEXITSTATUS(*stat));
+		else if (WIFSIGNALED(*stat))
+		{
+			__get_var(SETEXIT, WTERMSIG(*stat) + 128);
+			if (WTERMSIG(*stat) == SIGQUIT)
+				write(2, "QUIT\n", 6);
+		}
 	}
 }
 
@@ -318,37 +429,14 @@ int	execute(t_headers *header)
 	exec_init(header, exec);
 	replace_arg(header, exec);
 	cmd = header->cmd_h;
-	while (cmd && cmd->next != NULL)
-	{
-		pipe(exec->fd);
-		ft_cmds(exec, cmd, header);
-		if (exec->fd[1] > 2)
-			close(exec->fd[1]);
-		if (exec->in != 0)
-			close(exec->in);
-		exec->in = exec->fd[0];
-		exec->i++;
-		cmd = cmd->next;
-	}
+	cmd = commands(exec, cmd, header);
 	ft_last_cmd(exec, cmd, header);
 	while (i < exec->nb_cmd)
 	{
 		waitpid(exec->pid[i], &stat, 0);
 		i++;
 	}
-	if (cmd->prec)
-	{
-		if (WIFEXITED(stat))
-		{
-			__get_var(SETEXIT, WEXITSTATUS(stat));
-		}
-		else if (WIFSIGNALED(stat))
-		{
-			__get_var(SETEXIT, WTERMSIG(stat) + 128);
-			if (WTERMSIG(stat) == SIGQUIT)
-				dprintf(2, "\\QUIT\n");
-		}
-	}
+	some_status_code(cmd, &stat);
 	if (exec->in != 0)
 		close(exec->in);
 	exec_free(exec);

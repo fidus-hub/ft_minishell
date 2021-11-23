@@ -30,16 +30,6 @@ char	*ft_strstr(char *src, char *tofind)
 	return (0);
 }
 
-char	*ft_strdup_free(char *s1)
-{
-	char	*ret;
-
-	ret = ft_strdup(s1);
-	free(s1);
-	s1 = NULL;
-	return (ret);
-}
-
 char	*ft_strchr(const char *s, int c)
 {
 	int		i;
@@ -54,6 +44,16 @@ char	*ft_strchr(const char *s, int c)
 		i++;
 	}
 	return ((char *)s + i);
+}
+
+char	*ft_strdup_free(char *s1)
+{
+	char	*ret;
+
+	ret = ft_strdup(s1);
+	free(s1);
+	s1 = NULL;
+	return (ret);
 }
 
 int	ft_strlen(char *str)

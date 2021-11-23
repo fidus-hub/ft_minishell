@@ -1,8 +1,12 @@
 #PHONY: all clean fclean re
 
 
-LDFLAGS=-L/opt/homebrew/opt/readline/lib
-CPPFLAGS=-I/opt/homebrew/opt/readline/include
+#LDFLAGS=-L/home/linuxbrew/.linuxbrew/Cellar/readline/lib
+#CPPFLAGS=-I/home/linuxbrew/.linuxbrew/Cellar/readline/include
+LDFLAGS=-L/Users/yhebbat/.brew/opt/readline/lib
+CPPFLAGS=-I/Users/yhebbat/.brew/opt/readline/include
+#LDFLAGS=-L/Users/yhebbat/.brew/opt/readline/lib
+#CPPFLAGS=-I/Users/yhebbat/.brew/opt/readline/include
 
 #LDFLAGS=-L/home/linuxbrew/.linuxbrew/Cellar/readline/lib
 #CPPFLAGS=-I/home/linuxbrew/.linuxbrew/Cellar/readline/include
@@ -22,7 +26,7 @@ OBJECT = $(SRC:.c=.o)
 all : $(NAME)
 
 $(NAME):
-	@gcc $(SRC) -o $(NAME) -lreadline -g $(LDFLAGS) $(CPPFLAGS) #-fsanitize=address  
+	@gcc -Wall -Werror -Werror $(SRC) -o $(NAME) -lreadline -g $(LDFLAGS) $(CPPFLAGS) -fsanitize=address  
 	@echo "✅✅✅"
 
 #bonus:

@@ -1,32 +1,26 @@
-#include	"execution.h"
+#include "execution.h"
 #include <ctype.h>
 
-int	ft_exit(t_headers *headers)
+int	ft_isdigit(int c)
 {
-	int		j;
-	char	**args;
-
-	args = headers->cmd_h->args;
-	if (!args[1])
-	{
-		printf("exit\n");
-		exit(__get_var(GETEXIT, 0));
-	}
-	if (args[2] != NULL)
-	{
-		printf("exit\n");
-		printf("minishell: exit: too many arguments\n");
-		__get_var(SETEXIT, 1);
+	if (c >= '0' && c <= '9')
 		return (1);
-	}
+	return (0);
+}
+
+void	half_ft_exit(char **args)
+{
+	int	j;
+
 	j = 0;
 	while (args[1][j])
 	{
-		if (!(isdigit(args[1][j])))
+		if (!(ft_isdigit(args[1][j])))
 		{
-			printf("exit\n");
-			printf("%s %s: %s \n", "minishell: exit:", args[1],
-				"numeric argument required");
+			write(2, "exit\n", 6);
+			write(2, "minishell: exit:", 17);
+			write(2, args[1], ft_strlen(args[1]));
+			write(2, "numeric argument required\n", 26);
 			exit(255);
 		}
 		j++;
@@ -34,8 +28,44 @@ int	ft_exit(t_headers *headers)
 	if (args[2] == NULL)
 	{
 		__get_var(SETEXIT, atoi(args[1]));
-		printf("exit\n");
+		write(2, "exit\n", 6);
+		exit(atoi(args[1]));
+	}
+}
+
+int	checknumber(char *str)
+{
+	while (*str)
+	{
+		if (!ft_isdigit(*str))
+			return (0);
+		str++;
+	}
+	return (1);
+}
+
+int	ft_exit(t_cmds *cmd)
+{
+	char	**args;
+
+	args = cmd->args;
+	if (!args[1])
+	{
+		write(2, "exit\n", 6);
 		exit(__get_var(GETEXIT, 0));
 	}
+	if (args[2] != NULL)
+	{
+		if (checknumber(args[1]))
+		{
+			write(2, "exit\n", 6);
+			write(2, "minishell: exit: too many arguments\n", 37);
+			__get_var(SETEXIT, 1);
+			return (1);
+		}
+		write(2, "minishell: numeric argument required\n", 37);
+		exit(255);
+	}
+	half_ft_exit(args);
 	return (0);
 }

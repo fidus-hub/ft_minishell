@@ -321,31 +321,30 @@ void	file_is_here(t_cmds *find_redirection, int *red, int *i)
 	free(rest);
 }
 
-int	checkredirection_cmd(t_cmds	*find_red)
+int	checkredirection_cmd(t_cmds	*find_redirection)
 {
 	int	red;
 	int	s_q;
 	int	d_q;
 	int	i;
 
-	while (find_red)
+	while (find_redirection)
 	{
 		i = -1;
 		red = 0;
 		s_q = 0;
 		d_q = 0;
-		while (find_red->cmd[++i])
+		while (find_redirection->cmd[++i])
 		{
-			check_redquotes(&s_q, &d_q, find_red->cmd[i]);
-			if ((find_red->cmd[i] == '>' || find_red->cmd[i] == '<')
-				&& !(d_q % 2) && !(s_q % 2))
+			check_redquotes(&s_q, &d_q, find_redirection->cmd[i]);
+			if ((find_redirection->cmd[i] == '>'
+					|| find_redirection->cmd[i] == '<') && !(d_q % 2)
+				&& !(s_q % 2))
 			{
-				file_is_here(find_red, &red, &i);
-				// if (__get_var(GETEXIT, 0) == 1)
-				// 	return (-1);
+				file_is_here(find_redirection, &red, &i);
 			}
 		}
-		find_red = find_red->next;
+		find_redirection = find_redirection->next;
 	}
 	return (1);
 }
