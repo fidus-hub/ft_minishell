@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   fill_cmd_struct.c                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mgrissen <mgrissen@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/11/24 01:02:00 by mgrissen          #+#    #+#             */
+/*   Updated: 2021/11/24 01:09:16 by mgrissen         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../minishell.h"
 
 void	ft_addbotcmd_help(t_cmds *to_add)
@@ -251,6 +263,19 @@ void	dollar_calcul(char *str, int *i, int *d)
 	}
 }
 
+int	dollar_herdoc(char *str, int i)
+{
+	if (str[i] == '$')
+	{
+		i--;
+		while (i > 0 && str[i] == ' ')
+			i--;
+		if (i >= 1 && str[i] == '<' && str[i - 1] == '<')
+			return (1);
+	}
+	return (0);
+}
+
 int	ft_condition(t_cmds	*n_cmd, int i, int s_q, int d)
 {
 	if (n_cmd->cmd[i] == '$' && (d % 2) && n_cmd->cmd[i + 1] != '\0'
@@ -280,7 +305,8 @@ void	checkdollar_cmd(t_headers *header)
 		{
 			check_dollarquotes(&s_q, &d_q, n_cmd->cmd[i]);
 			dollar_calcul(n_cmd->cmd, &i, &d);
-			if (ft_condition(n_cmd, i, s_q, d))
+			dollar_herdoc(n_cmd->cmd, i);
+			if (ft_condition(n_cmd, i, s_q, d) && !dollar_herdoc(n_cmd->cmd, i))
 				dollar_is_here(n_cmd, &i, header);
 			i++;
 		}
@@ -298,30 +324,9 @@ void	save_cmd(t_headers *header, char **str)
 	checkdollar_cmd(header);
 	i = checkredirection_cmd(header->cmd_h);
 	ft_complet(header);
-	// if (header->cmd_h)
-	// 	if (i != -1 && (header->cmd_h->args[0] || header->cmd_h->file_h))
-	// 		execute(header);
-	new_cmd = header->cmd_h;
-	//file = file->next;
-	while (new_cmd)
-	{
-		file = new_cmd->file_h;
-		int i = 0;
-		printf("|%s|\n",new_cmd->cmd);
-		while (new_cmd->args[i])
-		{
-				printf("arg:%d ==> %s\n",i,new_cmd->args[i]);
-				i++;
-		}
-			while (file)
-		{
-			printf("[type:%d][name:%s]\n",file->type,file->filename);
-			//printf("[%s]\n",file->filename);
-			file = file->next;
-		}
-		printf("----------------------\n");
-		new_cmd = new_cmd->next;
-	}
+	if (header->cmd_h)
+		if (i != -1 && (header->cmd_h->args[0] || header->cmd_h->file_h))
+			execute(header);
 	new_cmd = header->cmd_h;
 	while (new_cmd)
 	{

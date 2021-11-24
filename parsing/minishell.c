@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mgrissen <mgrissen@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/11/24 01:03:06 by mgrissen          #+#    #+#             */
+/*   Updated: 2021/11/24 01:10:02 by mgrissen         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../minishell.h"
 
 void	ft_deltop_helper(t_env *to_delete)
@@ -82,7 +94,6 @@ void	handle_sigint(int sigint)
 	{
 		write(1, "\n", 1);
 		rl_on_new_line();
-		rl_replace_line("", 0);
 		rl_redisplay();
 		__get_var(SETEXIT, 1);
 	}

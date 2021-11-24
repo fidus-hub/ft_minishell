@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   execute.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mgrissen <mgrissen@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/11/24 00:49:27 by mgrissen          #+#    #+#             */
+/*   Updated: 2021/11/24 00:52:08 by mgrissen         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "execution.h"
 
 void	ft_perror(char *c, char *s)
@@ -83,7 +95,7 @@ void	exec_init(t_headers *header, t_exec *exec)
 	fill_env(exec, header);
 }
 
-void 	exec_free(t_exec *exec)
+void	exec_free(t_exec *exec)
 {
 	if (exec->path)
 		ft_free(exec->path);

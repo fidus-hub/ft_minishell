@@ -26,7 +26,7 @@ OBJECT = $(SRC:.c=.o)
 all : $(NAME)
 
 $(NAME):
-	@gcc -Wall -Werror -Werror $(SRC) -o $(NAME) -lreadline -g $(LDFLAGS) $(CPPFLAGS) -fsanitize=address  
+	@gcc -Wall -Werror -Werror $(SRC) -o $(NAME) -lreadline -g #$(LDFLAGS) $(CPPFLAGS) -fsanitize=address  
 	@echo "✅✅✅"
 
 #bonus:
