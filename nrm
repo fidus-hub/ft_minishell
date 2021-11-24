@@ -1,0 +1,98 @@
+minishell.h: OK!
+execution/cd.c: OK!
+execution/echo.c: OK!
+execution/env.c: OK!
+execution/execute.c: Error!
+Error: TOO_MANY_FUNCS       (line: 108, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 131, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 145, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 174, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 183, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 210, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 234, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 244, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 267, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 275, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 293, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 315, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 338, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 357, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 381, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 399, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 416, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 431, col:   1):	Too many functions in file
+execution/execution.h: OK!
+execution/exit.c: OK!
+execution/export.c: Error!
+Error: TOO_MANY_FUNCS       (line: 111, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 129, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 149, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 172, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 179, col:   1):	Too many functions in fileƒ
+Error: TOO_MANY_FUNCS       (line: 205, col:   1):	Too many functions in file
+execution/pipes.c: OK!
+execution/pwd.c: OK!
+execution/redirection_exec.c: Error!
+Error: TOO_MANY_LINES       (line:  50, col:   1):	Function has more than 25 lines
+execution/unset.c: Error!
+Error: TOO_MANY_FUNCS       (line:  82, col:   1):	Too many functions in file
+parsing/error.c: Error!
+Error: TOO_MANY_LINES       (line:  59, col:   1):	Function has more than 25 lines
+Error: TOO_MANY_LINES       (line: 122, col:   1):	Function has more than 25 lines
+Error: TOO_MANY_LINES       (line: 185, col:   1):	Function has more than 25 lines
+Error: TOO_MANY_FUNCS       (line: 187, col:   1):	Too many functions in file
+parsing/fill_cmd_struct.c: Error!
+Error: TOO_MANY_FUNCS       (line:  94, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 106, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 118, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 141, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 154, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 182, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 190, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 219, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 232, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 240, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 257, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 266, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 279, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 289, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 317, col:   1):	Too many functions in file
+parsing/fill_cmd_struct_sec.c: Error!
+Error: INVALID_HEADER       (line:   1, col:   1):	Missing or invalid 42 header
+Error: EMPTY_LINE_EOF       (line:   2, col:   1):	Empty line at end of file
+parsing/free.c: OK!
+parsing/ft_split.c: OK!
+parsing/ft_strjoin.c: Error!
+Error: TOO_MANY_FUNCS       (line:  98, col:   1):	Too many functions in file
+parsing/ft_tst.c: Error!
+Error: TOO_MANY_FUNCS       (line: 108, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 132, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 159, col:   1):	Too many functions in file
+parsing/libft0.c: OK!
+parsing/libft1.c: OK!
+parsing/minishell.c: Error!
+Error: TOO_MANY_FUNCS       (line: 102, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 118, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 143, col:   1):	Too many functions in file
+parsing/redirections.c: Error!
+Error: TOO_MANY_FUNCS       (line: 105, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 130, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 149, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 178, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 207, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 223, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 232, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 248, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 256, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 284, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 308, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 316, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 339, col:   1):	Too many functions in file
+parsing/save_env.c: Error!
+Error: TOO_MANY_FUNCS       (line: 103, col:   1):	Too many functions in file
+parsing/toke.c: Error!
+Error: TOO_MANY_FUNCS       (line: 107, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 114, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 138, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 165, col:   1):	Too many functions in file
+Error: TOO_MANY_FUNCS       (line: 179, col:   1):	Too many functions in file

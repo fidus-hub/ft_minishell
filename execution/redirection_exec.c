@@ -6,7 +6,7 @@
 /*   By: mgrissen <mgrissen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/24 00:49:48 by mgrissen          #+#    #+#             */
-/*   Updated: 2021/11/24 00:49:49 by mgrissen         ###   ########.fr       */
+/*   Updated: 2021/11/24 01:14:49 by mgrissen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,7 @@ void	redirection_inside_loop(int *in, int *out, t_file *file_h)
 		*in = open(file_h->filename, O_RDONLY, 0644);
 		if (*in == -1)
 		{
-			printfile_error(file_h->filename,
-				": No such file or directory\n", 0);
+			printfile_error(file_h->filename, ":No such file or directory\n", 0);
 			__get_var(SETEXIT, -1);
 		}
 	}
